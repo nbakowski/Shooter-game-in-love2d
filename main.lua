@@ -1,19 +1,22 @@
 function love.load()
   
   projectileSize = 10
-  rectangleWidth, rectangleHeight = 140, 132
-  targetWidth, targetHeight = 75, 75
+  playerWidth, playerHeight = 140, 132
+  targetWidth, targetHeight = 150, 150
   ammoBoxWidth, ammoBoxHeight = 150, 94
 
   love.window.setMode(0, 0, { fullscreen = true, centered = true })
 
   windowWidth, windowHeight = love.graphics.getWidth(), love.graphics.getHeight()
-  x, y = (windowWidth - rectangleWidth) / 2, windowHeight - rectangleHeight * 1.5
+  x, y = (windowWidth - playerWidth) / 2, windowHeight - playerHeight * 1.5
   isTargetPresent = false
 
   points = 0
   lives = 5
-  ammo = 5
+  ammo = 10
+  shotCooldown = 0.5
+  lastShotTime = 0
+  timer = 0
 
   -- iniate the shaders and the canvas
   crtShader = love.graphics.newShader("crt.glsl")
@@ -29,7 +32,7 @@ function love.load()
   ufoImage = love.graphics.newImage("ufo.png")
   spaceImage = love.graphics.newImage("space.png")
   ammoBoxImage = love.graphics.newImage("ammo_box.png")
-
+  
   movementSpeed = 10
   projectileSpeed = 20
   targetSpeed = 1
@@ -41,11 +44,17 @@ function love.load()
   isProjectilePresent = false
   isGameOver = false
   isAmmoBoxPresent = false
-  projectileX, projectileY = x + (rectangleWidth - projectileSize) / 2, y
+  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
   
 end
 
 function love.update(dt)
+  
+  if not isGameOver then
+    timer = timer + dt
+  end
+  
+  lastShotTime = lastShotTime + dt
   
   inputHandling()
 
@@ -77,14 +86,21 @@ function love.draw()
   love.graphics.draw(spaceImage, 0, 0, 0, love.graphics.getWidth() / 508, love.graphics.getHeight() / 288)
   
   -- generate interface
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.print("Press ESC to exit", 50, 50, 0, 3)
-  love.graphics.print("Points: " .. points, 50, 100, 0, 3)
-  love.graphics.print("Lives: " .. lives, 50, 150, 0, 3)
-  love.graphics.print("Ammo: " .. ammo, 50, 200, 0, 3)
+  love.graphics.setColor(0, 0, 0, 0.1)
+  for i = 15 ,0 , -1 do
+    love.graphics.rectangle("fill", 25 - i, 75 - i, 375 + i * 2, 300 + i * 2)
+  end
+  
+  love.graphics.setColor(0, 1, 0)
+  love.graphics.print("Press ESC to exit", 50, 100, 0, 3)
+  love.graphics.print("Timer: " .. string.format("%.2f", timer), 50, 150, 0, 3)
+  love.graphics.print("Points: " .. points, 50, 200, 0, 3)
+  love.graphics.print("Lives: " .. lives, 50, 250, 0, 3)
+  love.graphics.print("Ammo: " .. ammo, 50, 300, 0, 3)
   
   -- draw player model
-  love.graphics.draw(spacehipImage, x ,y, 0, rectangleWidth / 140, rectangleHeight / 132)
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.draw(spacehipImage, x ,y, 0, 1, 1)
   
   -- generate the projectile
   if isProjectilePresent then
@@ -94,11 +110,13 @@ function love.draw()
 
   -- generate the target
   love.graphics.setColor(1, 1, 1)
-  love.graphics.draw(ufoImage, targetX, targetY, 0, targetWidth / 150, targetHeight / 150)
+  love.graphics.draw(ufoImage, targetX, targetY, 0, 1, 1)
   
   -- generate ammo box
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.draw(ammoBoxImage, ammoX, ammoY, 0, ammoBoxWidth / 150, ammoBoxHeight / 94)
+  if ammo < 3 then
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ammoBoxImage, ammoX, ammoY, 0, 1, 1)
+  end
 
   -- game over screen
   if isGameOver then
@@ -161,7 +179,7 @@ end
 
 function restartGame()
   
-  projectileX, projectileY = x + (rectangleWidth - projectileSize) / 2, y
+  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
   points = 0
   isGameOver = false
   isTargetPresent = false
@@ -170,6 +188,8 @@ function restartGame()
   lives = 3
   ammo = 5
   success = love.audio.play(newGameSource)
+  lastShotTime = 0
+  timer = 0
   
 end
 
@@ -191,7 +211,7 @@ function inputHandling()
       
       if not isProjectilePresent then
     
-        projectileX = x + (rectangleWidth - projectileSize) / 2
+        projectileX = x + (playerWidth - projectileSize) / 2
         
       end
       
@@ -201,16 +221,17 @@ function inputHandling()
       
       if not isProjectilePresent then
         
-        projectileX = x + (rectangleWidth - projectileSize) / 2
+        projectileX = x + (playerWidth - projectileSize) / 2
         
       end
       
     elseif love.keyboard.isDown("up") then
       
-      if ammo > 0 and not isProjectilePresent then
+      if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
       
         isProjectilePresent = true
         ammo = ammo - 1
+        lastShotTime = 0
         
         end
       
@@ -246,7 +267,7 @@ function checkTargetBorderCollision()
       isProjectilePresent = false
       success = love.audio.play(lostLifeSource)
       lives = lives - 1
-      projectileX, projectileY = x + (rectangleWidth - projectileSize) / 2, y
+      projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
     else
       
       isProjectilePresent = false
@@ -273,10 +294,7 @@ function checkTargetCollision()
     targetSpeed = targetSpeed + targetSpeedInterval
     movementSpeed = movementSpeed + movementSpeedInterval
 
-    local targetSize = math.random(50, 150)
-    targetWidth, targetHeight = targetSize, targetSize
-
-    projectileX, projectileY = x + (rectangleWidth - projectileSize) / 2, y
+    projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
     
   end
   
@@ -284,16 +302,16 @@ end
 
 function checkAmmoBoxCollision()
   
-  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight then
+  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight and isAmmoBoxPresent then
     
     isProjectilePresent = false
     isAmmoBoxPresent = false
     
     success = love.audio.play(bangAudioSource)
 
-    ammo = ammo + 4
+    ammo = ammo + 8
 
-    projectileX, projectileY = x + (rectangleWidth - projectileSize) / 2, y
+    projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
     
   end
   
@@ -301,16 +319,16 @@ end
 
 function generateTarget()
   if not isTargetPresent then
-    targetX = math.random(rectangleWidth, windowWidth - rectangleWidth)
-    targetY = math.random(rectangleHeight, windowHeight / 2)
+    targetX = math.random(playerWidth, windowWidth - playerWidth)
+    targetY = math.random(playerHeight, windowHeight / 2)
     isTargetPresent = true
   end
 end
 
 function generateAmmoBox()
   if not isAmmoBoxPresent then
-    ammoX = math.random(rectangleWidth, windowWidth - rectangleWidth)
-    ammoY = math.random(rectangleHeight, windowHeight / 2)
+    ammoX = math.random(playerWidth, windowWidth - playerWidth)
+    ammoY = math.random(playerHeight, windowHeight / 2)
     isAmmoBoxPresent = true
   end
 end
