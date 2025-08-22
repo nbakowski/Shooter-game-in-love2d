@@ -25,6 +25,14 @@ function love.load()
   lastShotTime = 0
   timer = 0
 
+  spriteTimer = 0
+  animationSpeed = 6
+
+  isExploding = false 
+  explosionTimer = 0
+  explosionDuration = 0.25
+  explosionX, explosionY = 0, 0
+
   -- iniate the shaders and the canvas
   crtShader = love.graphics.newShader("assets/shaders/crt.glsl")
   canvas = love.graphics.newCanvas(windowWidth, windowHeight)
@@ -40,6 +48,7 @@ function love.load()
   ufoImage = love.graphics.newImage("assets/images/ufo.png")
   spaceImage = love.graphics.newImage("assets/images/space.png")
   ammoBoxImage = love.graphics.newImage("assets/images/ammo_box.png")
+  explosionSource = love.graphics.newImage("assets/images/spritesheet.png")
   
   movementSpeed = 10
   projectileSpeed = 20
@@ -54,7 +63,21 @@ function love.load()
   isAmmoBoxPresent = false
   isGameStarted = false
   projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
+
+  makeQuads()
   
+end
+
+function makeQuads()
+
+  quads = {}
+local imgWidth, imgHeight = explosionSource:getWidth(), explosionSource:getHeight()
+local spriteWidth = imgWidth / 3
+
+for i=0,2 do
+    table.insert(quads, love.graphics.newQuad(i * spriteWidth, 0, spriteWidth, imgHeight, imgWidth, imgHeight))
+end
+
 end
   
   function love.update(dt)
@@ -71,9 +94,17 @@ end
   
       if not isGameOver then
         timer = timer + dt
+        spriteTimer = spriteTimer + dt * animationSpeed
       end
       
       lastShotTime = lastShotTime + dt
+
+      if isExploding then
+        explosionTimer = explosionTimer + dt
+        if explosionTimer >= explosionDuration then
+          isExploding = false
+        end
+      end
       
       inputHandling()
 
@@ -130,7 +161,11 @@ end
 
     -- generate the target
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(ufoImage, targetX, targetY, 0, 1, 1)
+    if isExploding then
+      love.graphics.draw(explosionSource, quads[(math.floor(spriteTimer) % 3) + 1], explosionX, explosionY)
+    elseif isTargetPresent then 
+      love.graphics.draw(ufoImage, targetX, targetY, 0, 1, 1)
+    end
     
     -- generate ammo box
     if ammo < 4 then

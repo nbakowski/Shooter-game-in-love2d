@@ -2,8 +2,13 @@ function checkTargetCollision()
   
   if projectileX > targetX and projectileX + projectileSize < targetX + targetWidth and projectileY < targetY + targetHeight then
     
+
     isProjectilePresent = false
     isTargetPresent = false
+
+    isExploding = true
+    explosionTimer = 0
+    explosionX, explosionY = targetX, targetY
     
     playSound(bangAudioSource)
 
