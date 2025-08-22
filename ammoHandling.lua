@@ -1,11 +1,11 @@
 function checkAmmoBoxCollision()
   
-  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight then
+  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight and isAmmoBoxPresent and ammo < 4 then
     
     isProjectilePresent = false
     isAmmoBoxPresent = false
     
-    success = love.audio.play(bangAudioSource)
+    playSound(bangAudioSource)
 
     ammo = ammo + 8
 

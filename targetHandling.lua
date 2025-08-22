@@ -5,7 +5,7 @@ function checkTargetCollision()
     isProjectilePresent = false
     isTargetPresent = false
     
-    success = love.audio.play(bangAudioSource)
+    playSound(bangAudioSource)
 
     points = points + 1
     targetSpeed = targetSpeed + targetSpeedInterval
@@ -32,13 +32,13 @@ function checkTargetBorderCollision()
     if lives > 0 then
       
       isProjectilePresent = false
-      success = love.audio.play(lostLifeSource)
+      playSound(lostLifeSource)
       lives = lives - 1
       projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
     else
       
       isProjectilePresent = false
-      success = love.audio.play(failSource)
+      playSound(failSource)
       isGameOver = true
       targetSpeed = 0
       
@@ -56,13 +56,13 @@ function moveTarget()
     
     if lives > 0 then
       
-      success = love.audio.play(lostLifeSource)
+      playSound(lostLifeSource)
       lives = lives - 1
       isTargetPresent = false
       
     else
       
-      success = love.audio.play(failSource)
+      playSound(failSource)
       targetSpeed = 0
       isGameOver = true
       
