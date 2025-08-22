@@ -1,3 +1,7 @@
+loadfile 'ammoHandling.lua'()
+loadfile 'targetHandling.lua'()
+loadfile 'playerInteraction.lua'()
+
 function love.load()
   
   projectileSize = 10
@@ -19,19 +23,19 @@ function love.load()
   timer = 0
 
   -- iniate the shaders and the canvas
-  crtShader = love.graphics.newShader("crt.glsl")
+  crtShader = love.graphics.newShader("assets/shaders/crt.glsl")
   canvas = love.graphics.newCanvas(windowWidth, windowHeight)
 
   -- load audio
-  bangAudioSource = love.audio.newSource("bang.mp3", "static")
-  lostLifeSource = love.audio.newSource("lost_life.mp3", "static")
-  failSource = love.audio.newSource("fail.mp3", "stream")
-  newGameSource = love.audio.newSource("new_game.mp3", "stream")
+  bangAudioSource = love.audio.newSource("assets/sounds/bang.mp3", "static")
+  lostLifeSource = love.audio.newSource("assets/sounds/lost_life.mp3", "static")
+  failSource = love.audio.newSource("assets/sounds/fail.mp3", "stream")
+  newGameSource = love.audio.newSource("assets/sounds/new_game.mp3", "stream")
   
-  spacehipImage = love.graphics.newImage("spaceship.png")
-  ufoImage = love.graphics.newImage("ufo.png")
-  spaceImage = love.graphics.newImage("space.png")
-  ammoBoxImage = love.graphics.newImage("ammo_box.png")
+  spacehipImage = love.graphics.newImage("assets/images/spaceship.png")
+  ufoImage = love.graphics.newImage("assets/images/ufo.png")
+  spaceImage = love.graphics.newImage("assets/images/space.png")
+  ammoBoxImage = love.graphics.newImage("assets/images/ammo_box.png")
   
   movementSpeed = 10
   projectileSpeed = 20
@@ -131,52 +135,6 @@ function love.draw()
   love.graphics.setShader()
 end
 
-function moveTarget()
-  
-  targetY = targetY + targetSpeed -- move target
-
-  if targetY > windowHeight - targetHeight then
-    
-    if lives > 0 then
-      
-      success = love.audio.play(lostLifeSource)
-      lives = lives - 1
-      isTargetPresent = false
-      
-    else
-      
-      success = love.audio.play(failSource)
-      targetSpeed = 0
-      isGameOver = true
-      
-    end
-    
-  end
-  
-end
-
-function moveAmmo()
-    
-    if ammoDirection == "right" then
-  
-      ammoX = ammoX + targetSpeed
-      
-    elseif ammoDirection == "left" then
-      
-      ammoX = ammoX - targetSpeed
-      
-    end
-    
-    if ammoX > windowWidth - ammoBoxWidth then
-      ammoX = windowWidth - ammoBoxWidth
-      ammoDirection = "left"
-    elseif ammoX < 0 then
-      ammoX = 0
-      ammoDirection = "right"
-    end
-    
-end
-
 function restartGame()
   
   projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
@@ -191,150 +149,4 @@ function restartGame()
   lastShotTime = 0
   timer = 0
   
-end
-
-function inputHandling()
-  
-  if isGameOver then
-    
-    if love.keyboard.isDown("r") then
-      restartGame()
-    elseif love.keyboard.isDown("escape") then
-      love.event.quit()
-    end
-    
-  elseif not isGameOver then
-    
-    if love.keyboard.isDown("right") then
-  
-      x = x + movementSpeed
-      
-      if not isProjectilePresent then
-    
-        projectileX = x + (playerWidth - projectileSize) / 2
-        
-      end
-      
-    elseif love.keyboard.isDown("left") then
-      
-      x = x - movementSpeed
-      
-      if not isProjectilePresent then
-        
-        projectileX = x + (playerWidth - projectileSize) / 2
-        
-      end
-      
-    elseif love.keyboard.isDown("up") then
-      
-      if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
-      
-        isProjectilePresent = true
-        ammo = ammo - 1
-        lastShotTime = 0
-        
-        end
-      
-    elseif love.keyboard.isDown("escape") then
-      
-      love.event.quit()
-      
-    end
-    
-  end
-  
-end
-
-function shootProjectile()
-  
-  if isProjectilePresent then
-    
-    checkTargetCollision()
-    checkAmmoBoxCollision()
-    checkTargetBorderCollision()
-    projectileY = projectileY - projectileSpeed
-    
-  end
-  
-end
-
-function checkTargetBorderCollision()
-  
-  if projectileY < 0 then
-    
-    if lives > 0 then
-      
-      isProjectilePresent = false
-      success = love.audio.play(lostLifeSource)
-      lives = lives - 1
-      projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-    else
-      
-      isProjectilePresent = false
-      success = love.audio.play(failSource)
-      isGameOver = true
-      targetSpeed = 0
-      
-    end
-    
-  end
-  
-end
-
-function checkTargetCollision()
-  
-  if projectileX > targetX and projectileX + projectileSize < targetX + targetWidth and projectileY < targetY + targetHeight then
-    
-    isProjectilePresent = false
-    isTargetPresent = false
-    
-    success = love.audio.play(bangAudioSource)
-
-    points = points + 1
-    targetSpeed = targetSpeed + targetSpeedInterval
-    movementSpeed = movementSpeed + movementSpeedInterval
-
-    projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-    
-  end
-  
-end
-
-function checkAmmoBoxCollision()
-  
-  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight and isAmmoBoxPresent then
-    
-    isProjectilePresent = false
-    isAmmoBoxPresent = false
-    
-    success = love.audio.play(bangAudioSource)
-
-    ammo = ammo + 8
-
-    projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-    
-  end
-  
-end
-
-function generateTarget()
-  if not isTargetPresent then
-    targetX = math.random(playerWidth, windowWidth - playerWidth)
-    targetY = math.random(playerHeight, windowHeight / 2)
-    isTargetPresent = true
-  end
-end
-
-function generateAmmoBox()
-  if not isAmmoBoxPresent then
-    ammoX = math.random(playerWidth, windowWidth - playerWidth)
-    ammoY = math.random(playerHeight, windowHeight / 2)
-    isAmmoBoxPresent = true
-  end
-end
-
-function checkPlayerBorderCollision()
-  if x > windowWidth or x < 0 then
-    x = windowWidth - x
-  end
 end
