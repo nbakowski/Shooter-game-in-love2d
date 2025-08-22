@@ -2,7 +2,10 @@
 
 A simple 2d game I made using Lua and love2d. 
 
+Shader I used to make the CRT effect: https://www.shadertoy.com/view/Ms23DR
+
 # How it looks?
 
-<img width="1710" height="1112" alt="image" src="https://github.com/user-attachments/assets/18e5c6df-385d-4ba5-a6f0-0d33b69f29d5" />
+<img width="3420" height="2224" alt="image" src="https://github.com/user-attachments/assets/dc866803-c749-4a0a-adaa-50a2cf108e17" />
+
 
