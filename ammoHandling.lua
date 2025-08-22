@@ -1,18 +1,18 @@
 function checkAmmoBoxCollision()
-  
-  if projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight and isAmmoBoxPresent and ammo < 4 then
-    
+  if
+    projectileX > ammoX and projectileX + projectileSize < ammoX + ammoBoxWidth and projectileY < ammoY + ammoBoxHeight and
+      isAmmoBoxPresent and
+      ammo < 4
+   then
     isProjectilePresent = false
     isAmmoBoxPresent = false
-    
+
     playSound(bangAudioSource)
 
     ammo = ammo + 8
 
     projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-    
   end
-  
 end
 
 function generateAmmoBox()
@@ -24,23 +24,17 @@ function generateAmmoBox()
 end
 
 function moveAmmo()
-    
-    if ammoDirection == "right" then
-  
-      ammoX = ammoX + targetSpeed
-      
-    elseif ammoDirection == "left" then
-      
-      ammoX = ammoX - targetSpeed
-      
-    end
-    
-    if ammoX > windowWidth - ammoBoxWidth then
-      ammoX = windowWidth - ammoBoxWidth
-      ammoDirection = "left"
-    elseif ammoX < 0 then
-      ammoX = 0
-      ammoDirection = "right"
-    end
-    
+  if ammoDirection == "right" then
+    ammoX = ammoX + targetSpeed
+  elseif ammoDirection == "left" then
+    ammoX = ammoX - targetSpeed
+  end
+
+  if ammoX > windowWidth - ammoBoxWidth then
+    ammoX = windowWidth - ammoBoxWidth
+    ammoDirection = "left"
+  elseif ammoX < 0 then
+    ammoX = 0
+    ammoDirection = "right"
+  end
 end

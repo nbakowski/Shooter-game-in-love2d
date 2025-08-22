@@ -1,22 +1,21 @@
-loadfile 'ammoHandling.lua'()
-loadfile 'targetHandling.lua'()
-loadfile 'playerInteraction.lua'()
-loadfile 'menu.lua'()
+loadfile "ammoHandling.lua"()
+loadfile "targetHandling.lua"()
+loadfile "playerInteraction.lua"()
+loadfile "menu.lua"()
 
 function love.load()
-  
   font = love.graphics.newFont("assets/fonts/PressStart2P-vaV7.ttf", 32)
-  
+
   projectileSize = 10
   playerWidth, playerHeight = 140, 132
   targetWidth, targetHeight = 150, 150
   ammoBoxWidth, ammoBoxHeight = 150, 94
 
-  love.window.setMode(0, 0, { fullscreen = true, centered = true })
+  love.window.setMode(0, 0, {fullscreen = true, centered = true})
 
   windowWidth, windowHeight = love.graphics.getWidth(), love.graphics.getHeight()
   x, y = (windowWidth - playerWidth) / 2, windowHeight - playerHeight * 1.5
-  isTargetPresent = false
+  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
 
   points = 0
   lives = 5
@@ -25,10 +24,11 @@ function love.load()
   lastShotTime = 0
   timer = 0
 
+  -- animation stuff
   spriteTimer = 0
   animationSpeed = 6
 
-  isExploding = false 
+  isExploding = false
   explosionTimer = 0
   explosionDuration = 0.25
   explosionX, explosionY = 0, 0
@@ -43,13 +43,15 @@ function love.load()
   failSource = love.audio.newSource("assets/sounds/fail.mp3", "static")
   newGameSource = love.audio.newSource("assets/sounds/new_game.mp3", "static")
   gameStartSource = love.audio.newSource("assets/sounds/game_start.mp3", "static")
-  
+
+  -- load images
   spacehipImage = love.graphics.newImage("assets/images/spaceship.png")
   ufoImage = love.graphics.newImage("assets/images/ufo.png")
   spaceImage = love.graphics.newImage("assets/images/space.png")
   ammoBoxImage = love.graphics.newImage("assets/images/ammo_box.png")
   explosionSource = love.graphics.newImage("assets/images/spritesheet.png")
-  
+
+  -- set parameters
   movementSpeed = 10
   projectileSpeed = 20
   targetSpeed = 1
@@ -58,104 +60,90 @@ function love.load()
   targetSpeedInterval = 1 / 10
   movementSpeedInterval = 1 / 5
 
+  -- booleans
   isProjectilePresent = false
   isGameOver = false
   isAmmoBoxPresent = false
   isGameStarted = false
-  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-
-  makeQuads()
-  
-end
-
-function makeQuads()
+  isTargetPresent = false
 
   quads = {}
-local imgWidth, imgHeight = explosionSource:getWidth(), explosionSource:getHeight()
-local spriteWidth = imgWidth / 3
+  local imgWidth, imgHeight = explosionSource:getWidth(), explosionSource:getHeight()
+  local spriteWidth = imgWidth / 3
 
-for i=0,2 do
+  for i = 0, 2 do
     table.insert(quads, love.graphics.newQuad(i * spriteWidth, 0, spriteWidth, imgHeight, imgWidth, imgHeight))
+  end
 end
 
-end
-  
-  function love.update(dt)
-    
-    if not isGameStarted then
-      
-      inputHandling()
-      
-      crtShader:send("time", love.timer.getTime())
+function love.update(dt)
+  if not isGameStarted then
+    inputHandling()
 
-      crtShader:send("resolution", { windowWidth, windowHeight })
-    
+    crtShader:send("time", love.timer.getTime())
+
+    crtShader:send("resolution", {windowWidth, windowHeight})
+  end
+
+  if not isGameOver then
+    timer = timer + dt
+    spriteTimer = spriteTimer + dt * animationSpeed
+  end
+
+  lastShotTime = lastShotTime + dt
+
+  if isExploding then
+    explosionTimer = explosionTimer + dt
+    if explosionTimer >= explosionDuration then
+      isExploding = false
     end
-  
-      if not isGameOver then
-        timer = timer + dt
-        spriteTimer = spriteTimer + dt * animationSpeed
-      end
-      
-      lastShotTime = lastShotTime + dt
+  end
 
-      if isExploding then
-        explosionTimer = explosionTimer + dt
-        if explosionTimer >= explosionDuration then
-          isExploding = false
-        end
-      end
-      
-      inputHandling()
+  inputHandling()
 
-      shootProjectile()
+  shootProjectile()
 
-      generateTarget()
-      
-      generateAmmoBox()
+  generateTarget()
 
-      checkPlayerBorderCollision()
+  generateAmmoBox()
 
-      crtShader:send("time", love.timer.getTime())
+  checkPlayerBorderCollision()
 
-      crtShader:send("resolution", { windowWidth, windowHeight })
-      
-      moveTarget()
-      
-      moveAmmo()
-  
+  crtShader:send("time", love.timer.getTime())
+
+  crtShader:send("resolution", {windowWidth, windowHeight})
+
+  moveTarget()
+
+  moveAmmo()
 end
-  
-  function love.draw()
-    
-    if not isGameStarted then
-      
-      drawMenu()
-      
-    else
-    
+
+function love.draw()
+  if not isGameStarted then
+    drawMenu()
+  else
     love.graphics.setCanvas(canvas)
 
     love.graphics.clear(0, 0.05, 0.1)
-    
+
     -- draw background image
     love.graphics.draw(spaceImage, 0, 0, 0, love.graphics.getWidth() / 508, love.graphics.getHeight() / 288)
-    
-    -- generate interface    
+
+    -- generate interface
     love.graphics.setColor(0, 1, 0)
     love.graphics.print("Press ESC to exit", 50, 100)
     love.graphics.print("Timer: " .. string.format("%.2f", timer), 50, 150)
     love.graphics.print("Points: " .. points, 50, 200)
     love.graphics.print("Lives: " .. lives, 50, 250)
     love.graphics.print("Ammo: " .. ammo, 50, 300)
-    
+
     -- draw player model
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(spacehipImage, x ,y, 0, 1, 1)
-    
+    love.graphics.draw(spacehipImage, x, y, 0, 1, 1)
+
     -- generate the projectile
     if isProjectilePresent then
-      love.graphics.setColor(1, 0.5 , 0)
+      love.graphics.setColor(1, 0.5, 0)
       love.graphics.rectangle("fill", projectileX, projectileY, projectileSize, projectileSize)
     end
 
@@ -163,10 +151,10 @@ end
     love.graphics.setColor(1, 1, 1)
     if isExploding then
       love.graphics.draw(explosionSource, quads[(math.floor(spriteTimer) % 3) + 1], explosionX, explosionY)
-    elseif isTargetPresent then 
+    elseif isTargetPresent then
       love.graphics.draw(ufoImage, targetX, targetY, 0, 1, 1)
     end
-    
+
     -- generate ammo box
     if ammo < 4 then
       love.graphics.setColor(1, 1, 1)
@@ -180,17 +168,14 @@ end
     end
 
     love.graphics.setCanvas()
-    love.graphics.setColor({ 1, 1, 1 })
+    love.graphics.setColor({1, 1, 1})
     love.graphics.setShader(crtShader)
     love.graphics.draw(canvas, 0, 0)
     love.graphics.setShader()
-    
   end
-  
-  end
+end
 
 function restartGame()
-  
   projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
   points = 0
   isGameOver = false
@@ -202,12 +187,9 @@ function restartGame()
   playSound(newGameSource)
   lastShotTime = 0
   timer = 0
-  
 end
 
 function playSound(audioSource)
-    
-    audioSource:stop()
-    audioSource:play()
-  
+  audioSource:stop()
+  audioSource:play()
 end

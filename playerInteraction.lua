@@ -1,74 +1,50 @@
 function inputHandling()
-  
   if not isGameStarted and love.keyboard.isDown("r") then
-      isGameStarted = true
-      playSound(gameStartSource)
-      return
-    end
-  
+    isGameStarted = true
+    playSound(gameStartSource)
+    return
+  end
+
   if isGameOver then
-    
     if love.keyboard.isDown("r") then
       restartGame()
     elseif love.keyboard.isDown("escape") then
       love.event.quit()
     end
-    
   elseif not isGameOver then
-    
     if love.keyboard.isDown("right") then
-  
       x = x + movementSpeed
-      
+
       if not isProjectilePresent then
-    
         projectileX = x + (playerWidth - projectileSize) / 2
-        
       end
-      
     elseif love.keyboard.isDown("left") then
-      
       x = x - movementSpeed
-      
+
       if not isProjectilePresent then
-        
         projectileX = x + (playerWidth - projectileSize) / 2
-        
       end
-      
     elseif love.keyboard.isDown("up") then
-      
       if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
-      
         isProjectilePresent = true
         ammo = ammo - 1
         lastShotTime = 0
-        
-        end
-      
+      end
     elseif love.keyboard.isDown("escape") then
-      
       love.event.quit()
-      
     end
-    
   end
-  
 end
 
 function shootProjectile()
-  
   if isProjectilePresent then
-    
     checkTargetCollision()
-      
+
     checkAmmoBoxCollision()
 
     checkTargetBorderCollision()
     projectileY = projectileY - projectileSpeed
-    
   end
-  
 end
 
 function checkPlayerBorderCollision()
