@@ -44,8 +44,8 @@ function checkTargetBorderCollision()
   end
 end
 
-function moveTarget()
-  targetY = targetY + targetSpeed -- move target
+function moveTarget(dt)
+  targetY = targetY + targetSpeed * dt-- move target
 
   if targetY > windowHeight - targetHeight then
     if lives > 0 then

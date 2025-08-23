@@ -1,4 +1,4 @@
-function inputHandling()
+function inputHandling(dt)
   if not isGameStarted and love.keyboard.isDown("r") then
     isGameStarted = true
     playSound(gameStartSource)
@@ -13,13 +13,13 @@ function inputHandling()
     end
   elseif not isGameOver then
     if love.keyboard.isDown("right") then
-      x = x + movementSpeed
+      x = x + movementSpeed * dt
 
       if not isProjectilePresent then
         projectileX = x + (playerWidth - projectileSize) / 2
       end
     elseif love.keyboard.isDown("left") then
-      x = x - movementSpeed
+      x = x - movementSpeed * dt
 
       if not isProjectilePresent then
         projectileX = x + (playerWidth - projectileSize) / 2
@@ -36,14 +36,14 @@ function inputHandling()
   end
 end
 
-function shootProjectile()
+function shootProjectile(dt)
   if isProjectilePresent then
     checkTargetCollision()
 
     checkAmmoBoxCollision()
 
     checkTargetBorderCollision()
-    projectileY = projectileY - projectileSpeed
+    projectileY = projectileY - projectileSpeed * dt
   end
 end
 

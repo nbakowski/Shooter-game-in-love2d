@@ -10,7 +10,7 @@ function checkAmmoBoxCollision()
     playSound(bangAudioSource)
 
     ammo = ammo + 8
-
+ 
     projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
   end
 end
@@ -23,11 +23,11 @@ function generateAmmoBox()
   end
 end
 
-function moveAmmo()
+function moveAmmo(dt)
   if ammoDirection == "right" then
-    ammoX = ammoX + targetSpeed
+    ammoX = ammoX + targetSpeed * dt
   elseif ammoDirection == "left" then
-    ammoX = ammoX - targetSpeed
+    ammoX = ammoX - targetSpeed * dt
   end
 
   if ammoX > windowWidth - ammoBoxWidth then

@@ -52,9 +52,9 @@ function love.load()
   explosionSource = love.graphics.newImage("assets/images/spritesheet.png")
 
   -- set parameters
-  movementSpeed = 10
-  projectileSpeed = 20
-  targetSpeed = 1
+  movementSpeed = 500
+  projectileSpeed = 600
+  targetSpeed = 100
   ammoDirection = "right"
 
   targetSpeedInterval = 1 / 10
@@ -99,9 +99,9 @@ function love.update(dt)
     end
   end
 
-  inputHandling()
+  inputHandling(dt)
 
-  shootProjectile()
+  shootProjectile(dt)
 
   generateTarget()
 
@@ -113,9 +113,9 @@ function love.update(dt)
 
   crtShader:send("resolution", {windowWidth, windowHeight})
 
-  moveTarget()
+  moveTarget(dt)
 
-  moveAmmo()
+  moveAmmo(dt)
 end
 
 function love.draw()
