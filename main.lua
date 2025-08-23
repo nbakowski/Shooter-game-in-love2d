@@ -3,6 +3,12 @@ require "targetHandling"
 require "playerInteraction"
 require "menu"
 
+local INITIAL_MOVEMENT_SPEED = 500
+local INITIAL_TARGET_SPEED = 100
+local INITIAL_LIVES = 5
+local INITIAL_AMMO = 10
+local SHOT_COOLDOWN = 0.5
+
 function love.load()
   font = love.graphics.newFont("assets/fonts/PressStart2P-vaV7.ttf", 32)
 
@@ -18,9 +24,9 @@ function love.load()
   projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
 
   points = 0
-  lives = 5
-  ammo = 10
-  shotCooldown = 0.5
+  lives = INITIAL_LIVES
+  ammo = INITIAL_AMMO
+  shotCooldown = SHOT_COOLDOWN
   lastShotTime = 0
   timer = 0
 
@@ -52,13 +58,13 @@ function love.load()
   explosionSource = love.graphics.newImage("assets/images/spritesheet.png")
 
   -- set parameters
-  movementSpeed = 500
+  movementSpeed = INITIAL_MOVEMENT_SPEED
   projectileSpeed = 600
-  targetSpeed = 100
+  targetSpeed = INITIAL_TARGET_SPEED
   ammoDirection = "right"
 
-  targetSpeedInterval = 1 / 10
-  movementSpeedInterval = 1 / 5
+  targetSpeedInterval = 4
+  movementSpeedInterval = 2
 
   -- booleans
   isProjectilePresent = false
@@ -99,15 +105,7 @@ function love.update(dt)
     end
   end
 
-  inputHandling(dt)
-
-  shootProjectile(dt)
-
-  generateTarget()
-
-  generateAmmoBox()
-
-  checkPlayerBorderCollision()
+  updateGameLogic(dt)
 
   crtShader:send("time", love.timer.getTime())
 
@@ -156,7 +154,7 @@ function love.draw()
     end
 
     -- generate ammo box
-    if ammo < 4 then
+    if ammo < 4 and isAmmoBoxPresent then
       love.graphics.setColor(1, 1, 1)
       love.graphics.draw(ammoBoxImage, ammoX, ammoY, 0, 1, 1)
     end
@@ -175,21 +173,38 @@ function love.draw()
   end
 end
 
-function restartGame()
-  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-  points = 0
-  isGameOver = false
-  isTargetPresent = false
-  targetSpeed = 1
-  movementSpeed = 10
-  lives = 3
-  ammo = 5
-  playSound(newGameSource)
-  lastShotTime = 0
-  timer = 0
+function love.quit()
+  canvas:release()
+  bangAudioSource:release()
+  lostLifeSource:release()
+  failSource:release()
+  newGameSource:release()
+  gameStartSource:release()
 end
 
 function playSound(audioSource)
   audioSource:stop()
   audioSource:play()
+end
+
+function updateGameLogic(dt)
+  inputHandling(dt)
+  shootProjectile(dt)
+  generateTarget()
+  generateAmmoBox()
+  checkPlayerBorderCollision()
+end
+
+function restartGame()
+  projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
+  points = 0
+  isGameOver = false
+  isTargetPresent = false
+  movementSpeed = INITIAL_MOVEMENT_SPEED
+  targetSpeed = INITIAL_TARGET_SPEED
+  lives = INITIAL_LIVES
+  ammo = INITIAL_AMMO
+  playSound(newGameSource)
+  lastShotTime = 0
+  timer = 0
 end
