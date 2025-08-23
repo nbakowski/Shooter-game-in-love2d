@@ -36,17 +36,6 @@ function inputHandling(dt)
   end
 end
 
-function shootProjectile(dt)
-  if isProjectilePresent then
-    checkTargetCollision()
-
-    checkAmmoBoxCollision()
-
-    checkTargetBorderCollision()
-    projectileY = projectileY - projectileSpeed * dt
-  end
-end
-
 function checkPlayerBorderCollision()
   if x > windowWidth or x < 0 then
     x = windowWidth - x

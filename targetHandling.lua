@@ -28,22 +28,6 @@ function generateTarget()
   end
 end
 
-function checkTargetBorderCollision()
-  if projectileY < 0 then
-    if lives > 0 then
-      isProjectilePresent = false
-      playSound(lostLifeSource)
-      lives = lives - 1
-      projectileX, projectileY = x + (playerWidth - projectileSize) / 2, y
-    else
-      isProjectilePresent = false
-      playSound(failSource)
-      isGameOver = true
-      targetSpeed = 0
-    end
-  end
-end
-
 function moveTarget(dt)
   targetY = targetY + targetSpeed * dt-- move target
 
@@ -53,7 +37,9 @@ function moveTarget(dt)
       lives = lives - 1
       isTargetPresent = false
     else
-      playSound(failSource)
+      if not isGameOver then
+        love.audio.play(failSource)
+      end
       targetSpeed = 0
       isGameOver = true
     end

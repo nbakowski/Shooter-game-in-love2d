@@ -1,6 +1,7 @@
 require "ammoHandling"
 require "targetHandling"
 require "playerInteraction"
+require "projectile"
 require "menu"
 
 local INITIAL_MOVEMENT_SPEED = 500
