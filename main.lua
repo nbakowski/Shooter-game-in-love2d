@@ -1,7 +1,7 @@
-loadfile "ammoHandling.lua"()
-loadfile "targetHandling.lua"()
-loadfile "playerInteraction.lua"()
-loadfile "menu.lua"()
+require "ammoHandling"
+require "targetHandling"
+require "playerInteraction"
+require "menu"
 
 function love.load()
   font = love.graphics.newFont("assets/fonts/PressStart2P-vaV7.ttf", 32)
