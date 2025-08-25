@@ -6,9 +6,9 @@ function checkTargetCollision()
     isProjectilePresent = false
     isTargetPresent = false
 
-    isExploding = true
-    explosionTimer = 0
-    explosionX, explosionY = targetX, targetY
+    isTargetExploding = true
+    targetExplosionTimer = 0
+    targetExplosionX, targetExplosionY = targetX, targetY
 
     playSound(bangAudioSource)
 

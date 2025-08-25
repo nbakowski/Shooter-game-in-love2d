@@ -24,15 +24,18 @@ function inputHandling(dt)
       if not isProjectilePresent then
         projectileX = x + (playerWidth - projectileSize) / 2
       end
-    elseif love.keyboard.isDown("up") then
+    elseif love.keyboard.isDown("escape") then
+      love.event.quit()
+    end
+
+    if love.keyboard.isDown("up") then
       if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
         isProjectilePresent = true
         ammo = ammo - 1
         lastShotTime = 0
       end
-    elseif love.keyboard.isDown("escape") then
-      love.event.quit()
     end
+
   end
 end
 

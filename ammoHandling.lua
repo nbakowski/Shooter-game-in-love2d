@@ -7,6 +7,10 @@ function checkAmmoBoxCollision()
     isProjectilePresent = false
     isAmmoBoxPresent = false
 
+    isAmmoExploding = true
+    ammoExplosionTimer = 0
+    ammoExplosionX, ammoExplosionY = ammoX, ammoY
+
     playSound(bangAudioSource)
 
     ammo = ammo + 8

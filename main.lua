@@ -35,10 +35,13 @@ function love.load()
   spriteTimer = 0
   animationSpeed = 6
 
-  isExploding = false
-  explosionTimer = 0
+  isTargetExploding = false
+  isAmmoExploding = false
+  targetExplosionTimer = 0
+  ammoExplosionTimer = 0
   explosionDuration = 0.25
-  explosionX, explosionY = 0, 0
+  targetExplosionX, targetExplosionY = 0, 0
+  ammoExplosionX, ammoExplosionY = 0, 0
 
   -- iniate the shaders and the canvas
   crtShader = love.graphics.newShader("assets/shaders/crt.glsl")
@@ -60,7 +63,7 @@ function love.load()
 
   -- set parameters
   movementSpeed = INITIAL_MOVEMENT_SPEED
-  projectileSpeed = 600
+  projectileSpeed = 900
   targetSpeed = INITIAL_TARGET_SPEED
   ammoDirection = "right"
 
@@ -99,10 +102,17 @@ function love.update(dt)
 
   lastShotTime = lastShotTime + dt
 
-  if isExploding then
-    explosionTimer = explosionTimer + dt
-    if explosionTimer >= explosionDuration then
-      isExploding = false
+  if isTargetExploding then
+    targetExplosionTimer = targetExplosionTimer + dt
+    if targetExplosionTimer >= explosionDuration then
+      isTargetExploding = false
+    end
+  end
+
+  if isAmmoExploding then
+    ammoExplosionTimer = ammoExplosionTimer + dt
+    if ammoExplosionTimer >= explosionDuration then
+      isAmmoExploding = false
     end
   end
 
@@ -148,14 +158,16 @@ function love.draw()
 
     -- generate the target
     love.graphics.setColor(1, 1, 1)
-    if isExploding then
-      love.graphics.draw(explosionSource, quads[(math.floor(spriteTimer) % 3) + 1], explosionX, explosionY)
+    if isTargetExploding then
+      love.graphics.draw(explosionSource, quads[(math.floor(spriteTimer) % 3) + 1], targetExplosionX, targetExplosionY)
     elseif isTargetPresent then
       love.graphics.draw(ufoImage, targetX, targetY, 0, 1, 1)
     end
 
     -- generate ammo box
-    if ammo < 4 and isAmmoBoxPresent then
+    if isAmmoExploding then
+      love.graphics.draw(explosionSource, quads[(math.floor(spriteTimer) % 3) + 1], ammoExplosionX, ammoExplosionY)
+    elseif ammo < 4 and isAmmoBoxPresent then
       love.graphics.setColor(1, 1, 1)
       love.graphics.draw(ammoBoxImage, ammoX, ammoY, 0, 1, 1)
     end
