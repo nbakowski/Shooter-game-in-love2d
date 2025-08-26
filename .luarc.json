@@ -1,0 +1,4 @@
+{
+  "diagnostics.globals": ["checkAmmoBoxCollision"],
+  "diagnostics.disable": ["lowercase-global"]
+}

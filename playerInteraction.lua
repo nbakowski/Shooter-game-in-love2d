@@ -1,46 +1,55 @@
+local love = require("love")
+
 function inputHandling(dt)
-  if not isGameStarted and love.keyboard.isDown("r") then
-    isGameStarted = true
-    playSound(gameStartSource)
-    return
-  end
-
-  if isGameOver then
-    if love.keyboard.isDown("r") then
-      restartGame()
-    elseif love.keyboard.isDown("escape") then
-      love.event.quit()
+    if love.keyboard.isDown("f11") then
+        if isFullScreen then
+            love.window.setFullscreen(isFullScreen)
+        else
+            love.window.setFullscreen(isFullScreen, "desktop")
+        end
+        isFullScreen = not isFullScreen
     end
-  elseif not isGameOver then
-    if love.keyboard.isDown("right") then
-      x = x + movementSpeed * dt
+    if not isGameStarted and love.keyboard.isDown("r") then
+        isGameStarted = true
+        playSound(gameStartSource)
+        return
+    else
+        if isGameOver then
+            if love.keyboard.isDown("r") then
+                restartGame()
+            elseif love.keyboard.isDown("escape") then
+                love.event.quit()
+            end
+        else
+            if love.keyboard.isDown("right") then
+                x = x + movementSpeed * dt
 
-      if not isProjectilePresent then
-        projectileX = x + (playerWidth - projectileSize) / 2
-      end
-    elseif love.keyboard.isDown("left") then
-      x = x - movementSpeed * dt
+                if not isProjectilePresent then
+                    projectileX = x + (playerWidth - projectileSize) / 2
+                end
+            elseif love.keyboard.isDown("left") then
+                x = x - movementSpeed * dt
 
-      if not isProjectilePresent then
-        projectileX = x + (playerWidth - projectileSize) / 2
-      end
-    elseif love.keyboard.isDown("escape") then
-      love.event.quit()
+                if not isProjectilePresent then
+                    projectileX = x + (playerWidth - projectileSize) / 2
+                end
+            elseif love.keyboard.isDown("escape") then
+                love.event.quit()
+            end
+
+            if love.keyboard.isDown("up") then
+                if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
+                    isProjectilePresent = true
+                    ammo = ammo - 1
+                    lastShotTime = 0
+                end
+            end
+        end
     end
-
-    if love.keyboard.isDown("up") then
-      if ammo > 0 and not isProjectilePresent and lastShotTime >= shotCooldown then
-        isProjectilePresent = true
-        ammo = ammo - 1
-        lastShotTime = 0
-      end
-    end
-
-  end
 end
 
 function checkPlayerBorderCollision()
-  if x > windowWidth or x < 0 then
-    x = windowWidth - x
-  end
+    if x > windowWidth - playerWidth or x < 0 + playerWidth then
+        x = windowWidth - x
+    end
 end
